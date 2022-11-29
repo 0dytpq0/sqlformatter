@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Input, Button } from "antd";
+import { Input, Button, Modal, Row, Col } from "antd";
+import "../App.css";
 const Inputsource = () => {
   const { TextArea } = Input;
   const [value, setValue] = useState("");
@@ -24,15 +25,29 @@ const Inputsource = () => {
   ];
   const onClickHandler = (e) => {
     let formattedValue = value;
+    let usedBackTick = false;
+    let usedPipeLine = false;
     formattedValue = formattedValue
-      .replaceAll("'", "`")
+      .replaceAll("\n", " ")
       .replaceAll("\n", " ")
       .replaceAll("  ", " ")
       .replaceAll("  ", " ")
       .replaceAll("  ", " ")
       .replaceAll("  ", " ")
       .replaceAll("  ", " ")
+      .replaceAll("  ", " ")
       .replaceAll("  ", " ");
+
+    if (!formattedValue.includes("`")) {
+      usedBackTick = true;
+      formattedValue = formattedValue.replaceAll("'", "`");
+    } else if (!formattedValue.includes("|")) {
+      usedPipeLine = true;
+      formattedValue = formattedValue.replaceAll("'", "|");
+    } else {
+      Modal.error("코드에 백틱이나 파이프라인이 있습니다.");
+      return;
+    }
     console.log("formattedValue", formattedValue);
     let valueArray1 = formattedValue.split(";");
     console.log("valueArray1 :>> ", valueArray1);
@@ -59,33 +74,50 @@ const Inputsource = () => {
         return item.trim();
       }
     });
+    console.log("useBackTick :>> ", usedBackTick);
+    console.log("first", usedPipeLine);
     let vv = result.join(" ");
-    console.log("vv", vv);
-    console.log("valueArray :>> ", result);
+    if (usedBackTick) {
+      vv = vv.replaceAll("`", "'");
+    } else if (usedPipeLine) {
+      vv = vv.replaceAll("|", "'");
+    }
     // '\r\n' <- 개행.
     setFormatted(vv);
   };
   return (
-    <div>
-      <TextArea
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        placeholder="Controlled autosize"
-        autoSize={{
-          minRows: 8,
-          maxRows: 8,
-        }}
-      />
-      <Button onClick={onClickHandler}>formatting</Button>
-      <TextArea
-        value={formatted}
-        placeholder="Controlled autosize"
-        autoSize={{
-          minRows: 8,
-          maxRows: 10,
-        }}
-      />
-    </div>
+    <Row className="container">
+      <Col style={{ width: "45%" }}>
+        <div>
+          <h1>SQL FORMATTER</h1>
+          <TextArea
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="Controlled autosize"
+            autoSize={{
+              minRows: 38,
+              maxRows: 38,
+            }}
+          />
+        </div>
+      </Col>
+      <Col className="button" flex={0}>
+        <Button onClick={onClickHandler}>formatting</Button>
+      </Col>
+      <Col style={{ width: "45%" }}>
+        <div>
+          <h1>FORMATTED</h1>
+          <TextArea
+            value={formatted}
+            placeholder="Controlled autosize"
+            autoSize={{
+              minRows: 38,
+              maxRows: 38,
+            }}
+          />
+        </div>
+      </Col>
+    </Row>
   );
 };
 
